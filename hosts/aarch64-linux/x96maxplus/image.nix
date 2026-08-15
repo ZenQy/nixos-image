@@ -5,9 +5,9 @@
   ...
 }:
 let
-  bootStart = 1;
+  bootStart = 4;
   bootSize = 0;
-  rootStart = 1;
+  rootStart = 4;
   rootSize = 2500;
   label = "nixos";
   baseName = "nixos";
@@ -37,7 +37,7 @@ in
       }
   );
 
-  system.build.vpsImage = import ../make-disk-image.nix {
+  system.build.vpsImage = import ../../../make-disk-image.nix {
     inherit
       config
       pkgs
@@ -51,10 +51,9 @@ in
       ;
 
     postVM = ''
-      echo "Compressing image..."
       cd $out
-      ${pkgs.zstd}/bin/zstd -T0 -10 ${baseName}.img -o ${baseName}.img.zst
-      rm ${baseName}.img
+      dd if=${./u-boot.bin} of=${baseName}.img conv=fsync bs=1 count=444
+      dd if=${./u-boot.bin} of=${baseName}.img conv=fsync bs=512 skip=1 seek=1
     '';
   };
 }

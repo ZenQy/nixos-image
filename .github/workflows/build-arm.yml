@@ -1,26 +1,15 @@
-name: Build image files
+name: Build ARM image files
 on:
   workflow_dispatch:
     inputs:
-      address:
-        description: "vps的ip地址"
-        required: true
-        default: "10.0.0.10/24"
-        type: string
-      gateway:
-        description: "vps的网关"
-        required: true
-        default: "10.0.0.1"
-        type: string
-      device:
+      host:
         type: choice
-        description: "硬盘类型，vda/sda"
+        description: "选择编译的镜像"
         options:
-          - vda
-          - sda
+          - tx3
+          - x96maxplus
         required: true
-        default: vda
-
+        default: tx3
 env:
   NIX_PATH: nixpkgs=channel:nixos-unstable
   TZ: Asia/Shanghai
@@ -60,20 +49,10 @@ jobs:
             git push
           fi
 
-      - name: Set Config
-        run: |
-          sed -i 's|10.0.0.10/24|${{ inputs.address }}|g' hosts/x86_64-linux/vps/default.nix
-          sed -i 's|10.0.0.1|${{ inputs.gateway }}|g' hosts/x86_64-linux/vps/default.nix
-          echo "GATEWAY=${{ inputs.gateway }}" >> $GITHUB_ENV
-
-          if [[ ${{ inputs.device }} == 'sda' ]]; then
-            sed -i 's|/dev/vda|/dev/sda|g' hosts/x86_64-linux/vps/default.nix
-          fi
-
       - name: build image
         run: |
           echo "DATE=$(date +"%Y.%m%d.%H%M")" >> $GITHUB_ENV
-          nix build .#vps
+          nix build .#${{ inputs.host }}
 
       - name: Upload Image To Release
         uses: ncipollo/release-action@v1
@@ -81,9 +60,9 @@ jobs:
           allowUpdates: true
           removeArtifacts: true
           tag: v${{ env.DATE }}
-          artifacts: "result/*.img.zst"
+          artifacts: "result/*.img"
           body: |
-            Gateway:${{ env.GATEWAY }}
+            image:${{ inputs.host }}
 
       - name: Delete releases and workflows runs
         uses: ophub/delete-releases-workflows@main

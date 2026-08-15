@@ -35,6 +35,7 @@ jobs:
           extra_nix_config: |
             trusted-public-keys = zenqy.cachix.org-1:G5csLBsu/kQIOXU7XUiqeMacwzN1WQWv0+GysTVmJgo= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
             substituters = https://zenqy.cachix.org/ https://cache.nixos.org/
+            system-features = benchmark big-parallel nixos-test uid-range kvm
 
       - name: Run Nix Flake Update
         run: nix flake update

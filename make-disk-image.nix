@@ -125,7 +125,6 @@ let
           util-linux
           btrfs-progs
           dosfstools
-          virtiofsd
         ];
         postVM = moveOrConvertImage + postVM;
         QEMU_OPTS = lib.concatStringsSep " " (
